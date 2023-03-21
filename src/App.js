@@ -1,11 +1,14 @@
 import { useState } from "react";
 import "./App.css";
+import { useForm } from 'react-hook-form';
 
 export default function App() {
   const [values, setValues] = useState({
     email: '', password: '', confirmPassword: '', isRead: false,
   });
-  const [errors, setErrors] = useState([]);
+  // const [errors, setErrors] = useState([]);
+
+  const { register, handleSubmit, formState: { errors }, watch } = useForm();
 
   /// add function when value change
   const handleChange = (event) => {
@@ -22,86 +25,81 @@ export default function App() {
 
   };
 
-  function validate() {
-    const { email, password, isRead, confirmPassword } = values;
-    // we are going to store errors for all fields
-    // in a signle array
-    const errors = [];
 
-    if (email.length < 5) {
-      errors.push("Email should be at least 5 characters long");
-    }
-    if (email.split("").filter((x) => x === "@").length !== 1) {
-      errors.push("Email should contain a @");
-    }
-    if (email.indexOf(".") === -1) {
-      errors.push("Email should contain at least one dot");
-    }
-    if (password.length < 6) {
-      errors.push("Password should be at least 6 characters long");
-    }
-    if (password !== confirmPassword) {
-      errors.push("Password should be at least 6 characters long");
-    }
-    if (!isRead) {
-      errors.push("You must be accepted privacy policy");
-    }
-    return errors;
-  }
+  console.log('errors', errors);
 
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const errors = validate();
-    if (errors.length > 0) {
-      setErrors(errors);
-      return;
-    }
-  };
 
   const stringJson = JSON.stringify(values);
   return (
     <div className="container">
       <h1>Đăng ký</h1>
-      {errors.map((error) => (
+      {/* {errors.map((error) => (
         <p key={error}>Error: {error}</p>
-      ))}
-      <form onSubmit={handleSubmit}>
+      ))} */}
+      <form onSubmit={handleSubmit((data) => console.log(data))}>
         <p>nhập email:</p>
         <input
-          name="email"
-          type="text"
-          defaultValue={values.email}
-          onChange={handleChange}
+          {...register('email', {
+            required: "Required",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "invalid email address"
+            }
+          })}
         />
+        {errors?.email && <div> {errors?.email?.message}</div>}
         <p>nhập password:</p>
         <input
-          name="password"
+          {...register('password', {
+            required: "Required",
+            min: {
+              value: 3,
+              message: 'min length is 3'
+            },
+            max: {
+              value: 20,
+              message: 'min length is 20'
+            },
+          })}
           type="password"
-          defaultValue={values.password}
-          onChange={handleChange}
         />
+        {errors?.password && <div> {errors?.password?.message}</div>}
         <p>nhập lại password:</p>
         <input
-          name="confirmPassword"
+          {...register('confirmPassword', {
+            required: "Required",
+            min: {
+              value: 3,
+              message: 'min length is 3'
+            },
+            max: {
+              value: 20,
+              message: 'min length is 20'
+            },
+            validate: (val) => {
+              if (watch('password') != val) {
+                return "Your passwords do no match";
+              }
+            },
+          })}
           type="password"
-          defaultValue={values.confirmPassword}
-          onChange={handleChange}
         />
+        {errors?.confirmPassword && <div> {errors?.confirmPassword?.message}</div>}
         <br />
         <br />
         <label>
           <input
-            name="isRead"
+            {...register('isRead', {
+              required: "Required",
+            })}
             type="checkbox"
-            checked={values.isRead}
-            onChange={handleChange} />I read and accept the privacy policy:
+          />I read and accept the privacy policy:
         </label>
 
         <p>bấm submit form</p>
         <button>submit nè</button>
-      </form>
+      </form >
       <div className="show-json-string-setValues">{stringJson}</div>
-    </div>
+    </div >
   );
 }
