@@ -1,46 +1,44 @@
-import React, { useState } from 'react';
-import './App.css';
-export default function App() {
-  const [values, setValues] = useState({ email: '', name: '', content: '' });
+import React from 'react';
+import { useForm } from 'react-hook-form';
 
-  const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value });
-  };
+function App() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    alert(JSON.stringify(values));
-  };
+  const onSubmit = (data) => {
+    console.log(data);
+  }
 
   return (
-    <div className="container">
-      <h1>Liên hệ</h1>
-      <form onSubmit={handleSubmit}>
-        <p>Nhập tên:</p>
-        <input
-          name="name"
-          type="text"
-          defaultValue={values.name}
-          onChange={handleChange}
-        />
-        <p>Nhập email:</p>
-        <input
-          name="email"
-          type="email"
-          defaultValue={values.email}
-          onChange={handleChange}
-        />
-        <p>Nội dung muốn gửi:</p>
-        <textarea
-          name="content"
-          defaultValue={values.content}
-          onChange={handleChange}
-        />
-        <br />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <label htmlFor="name">Họ và tên:</label>
+      <input type="text" id="name" {...register("name", { required: true })} />
+      {errors.name && <span>This field is required</span>}
 
-        <p>bấm submit form</p>
-        <button>submit nè</button>
-      </form>
-    </div>
+      <label htmlFor="address">Địa chỉ:</label>
+      <input type="text" id="address" {...register("address", { required: true })} />
+      {errors.address && <span>This field is required</span>}
+
+      <label htmlFor="phone">Số điện thoại:</label>
+      <input type="text" id="phone" {...register("phone", { required: true, pattern: /^[0-9\b]+$/i })} />
+      {errors.phone && errors.phone.type === "required" && <span>This field is required</span>}
+      {errors.phone && errors.phone.type === "pattern" && <span>Please enter a valid phone number</span>}
+
+      <label htmlFor="email">Email:</label>
+      <input type="email" id="email" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
+      {errors.email && errors.email.type === "required" && <span>This field is required</span>}
+      {errors.email && errors.email.type === "pattern" && <span>Please enter a valid email address</span>}
+
+      <label htmlFor="symptoms">Các triệu chứng trong vòng 14 ngày qua:</label>
+      <input type="checkbox" id="fever" {...register("fever")} />
+      <label htmlFor="fever">Sốt</label>
+      <input type="checkbox" id="cough" {...register("cough")} />
+      <label htmlFor="cough">Ho</label>
+      <input type="checkbox" id="breathlessness" {...register("breathlessness")} />
+      <label htmlFor="breathlessness">Khó thở</label>
+
+      <input type="submit" />
+    </form>
   );
 }
+
+export default App;
