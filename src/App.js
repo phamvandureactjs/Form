@@ -1,43 +1,41 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 function App() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-
-  const onSubmit = (data) => {
-    console.log(data);
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <label htmlFor="name">Họ và tên:</label>
-      <input type="text" id="name" {...register("name", { required: true })} />
-      {errors.name && <span>This field is required</span>}
+    <Formik
+      initialValues={{
+        to: '',
+        subject: '',
+        message: '',
+        attachment: null
+      }}
+      onSubmit={(values) => {
+        console.log(values);
+      }}
+    >
+      {(formik) => (
+        <Form>
+          <label htmlFor="to">Người nhận:</label>
+          <Field type="email" id="to" name="to" />
+          <ErrorMessage name="to" />
 
-      <label htmlFor="address">Địa chỉ:</label>
-      <input type="text" id="address" {...register("address", { required: true })} />
-      {errors.address && <span>This field is required</span>}
+          <label htmlFor="subject">Chủ đề:</label>
+          <Field type="text" id="subject" name="subject" />
+          <ErrorMessage name="subject" />
 
-      <label htmlFor="phone">Số điện thoại:</label>
-      <input type="text" id="phone" {...register("phone", { required: true, pattern: /^[0-9\b]+$/i })} />
-      {errors.phone && errors.phone.type === "required" && <span>This field is required</span>}
-      {errors.phone && errors.phone.type === "pattern" && <span>Please enter a valid phone number</span>}
+          <label htmlFor="message">Nội dung:</label>
+          <Field as="textarea" id="message" name="message" />
+          <ErrorMessage name="message" />
 
-      <label htmlFor="email">Email:</label>
-      <input type="email" id="email" {...register("email", { required: true, pattern: /^\S+@\S+$/i })} />
-      {errors.email && errors.email.type === "required" && <span>This field is required</span>}
-      {errors.email && errors.email.type === "pattern" && <span>Please enter a valid email address</span>}
+          <label htmlFor="attachment">File đính kèm:</label>
+          <Field type="file" id="attachment" name="attachment" />
+          <ErrorMessage name="attachment" />
 
-      <label htmlFor="symptoms">Các triệu chứng trong vòng 14 ngày qua:</label>
-      <input type="checkbox" id="fever" {...register("fever")} />
-      <label htmlFor="fever">Sốt</label>
-      <input type="checkbox" id="cough" {...register("cough")} />
-      <label htmlFor="cough">Ho</label>
-      <input type="checkbox" id="breathlessness" {...register("breathlessness")} />
-      <label htmlFor="breathlessness">Khó thở</label>
-
-      <input type="submit" />
-    </form>
+          <button type="submit">Gửi email</button>
+        </Form>
+      )}
+    </Formik>
   );
 }
 
