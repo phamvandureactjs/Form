@@ -1,105 +1,101 @@
 import { useState } from "react";
+import { Formik } from 'formik';
 import "./App.css";
-import { useForm } from 'react-hook-form';
 
 export default function App() {
   const [values, setValues] = useState({
     email: '', password: '', confirmPassword: '', isRead: false,
   });
-  // const [errors, setErrors] = useState([]);
-
-  const { register, handleSubmit, formState: { errors }, watch } = useForm();
-
-  /// add function when value change
-  const handleChange = (event) => {
-    event.persist();
-
-    if (event.target.name === 'isRead') {
-      setValues({
-        ...values,
-        [event.target.name]: !values.isRead,
-      });
-    } else {
-      setValues({ ...values, [event.target.name]: event.target.value });
-    }
-
-  };
-
-
-  console.log('errors', errors);
-
 
   const stringJson = JSON.stringify(values);
   return (
     <div className="container">
       <h1>Đăng ký</h1>
-      {/* {errors.map((error) => (
-        <p key={error}>Error: {error}</p>
-      ))} */}
-      <form onSubmit={handleSubmit((data) => console.log(data))}>
-        <p>nhập email:</p>
-        <input
-          {...register('email', {
-            required: "Required",
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: "invalid email address"
-            }
-          })}
-        />
-        {errors?.email && <div> {errors?.email?.message}</div>}
-        <p>nhập password:</p>
-        <input
-          {...register('password', {
-            required: "Required",
-            min: {
-              value: 3,
-              message: 'min length is 3'
-            },
-            max: {
-              value: 20,
-              message: 'min length is 20'
-            },
-          })}
-          type="password"
-        />
-        {errors?.password && <div> {errors?.password?.message}</div>}
-        <p>nhập lại password:</p>
-        <input
-          {...register('confirmPassword', {
-            required: "Required",
-            min: {
-              value: 3,
-              message: 'min length is 3'
-            },
-            max: {
-              value: 20,
-              message: 'min length is 20'
-            },
-            validate: (val) => {
-              if (watch('password') != val) {
-                return "Your passwords do no match";
-              }
-            },
-          })}
-          type="password"
-        />
-        {errors?.confirmPassword && <div> {errors?.confirmPassword?.message}</div>}
-        <br />
-        <br />
-        <label>
-          <input
-            {...register('isRead', {
-              required: "Required",
-            })}
-            type="checkbox"
-          />I read and accept the privacy policy:
-        </label>
-
-        <p>bấm submit form</p>
-        <button>submit nè</button>
-      </form >
+      <Formik
+        initialValues={{ email: '', confirmPassword: '', password: '', isRead: false }}
+        validate={values => {
+          const errors = {};
+          if (!values.email) {
+            errors.email = 'Required';
+          }
+          if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+            errors.email = 'Invalid email address';
+          }
+          if (!values.password) {
+            errors.password = 'Required';
+          }
+          if (!values.confirmPassword) {
+            errors.confirmPassword = 'Required';
+          }
+          if (values.confirmPassword !== values.password) {
+            errors.confirmPassword = 'Confirm password is not match';
+          }
+          return errors;
+        }}
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            alert(JSON.stringify(values, null, 2));
+            setSubmitting(false);
+          }, 400);
+        }}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          /* and other goodies */
+        }) => (
+          <form onSubmit={handleSubmit}>
+            <p>nhập email:</p>
+            <input
+              type="email"
+              name="email"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.email}
+            />
+            {errors.email && touched.email && <div className="error">{errors.email}</div>}
+            <br />
+            <p>nhập password:</p>
+            <input
+              type="password"
+              name="password"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.password}
+            />
+            {errors.password && touched.password && <div className="error">{errors.password}</div>}
+            <br />
+            <p>nhập lại password:</p>
+            <input
+              type="confirmPassword"
+              name="confirmPassword"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.confirmPassword}
+            />
+            {errors.confirmPassword && touched.confirmPassword && <div className="error">{errors.confirmPassword}</div>}
+            <br />
+            <br />
+            <label>
+              <input
+                name="isRead"
+                type="checkbox"
+                checked={values.isRead}
+                onChange={handleChange} />I read and accept the privacy policy:
+            </label>
+            <br />
+            <button type="submit" disabled={isSubmitting}>
+              Submit
+            </button>
+          </form>
+        )}
+      </Formik>
       <div className="show-json-string-setValues">{stringJson}</div>
-    </div >
+    </div>
   );
-}
+} 
